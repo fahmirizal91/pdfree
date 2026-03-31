@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import MergePage from './pages/MergePage';
 import SplitPage from './pages/SplitPage';
 import CompressPage from './pages/CompressPage';
-import EditPage from './pages/EditPage'; 
+// import EditPage from './pages/EditPage'; 
 import RotatePage from './pages/RotatePage';
 import PdfToJpgPage from './pages/PdfToJpgPage';
 import JpgToPdfPage from './pages/JpgToPdfPage';
