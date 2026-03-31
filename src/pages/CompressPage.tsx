@@ -59,7 +59,7 @@ export default function CompressPage() {
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        await page.render({ canvasContext: context, viewport }).promise;
+        await page.render({ canvasContext: context, viewport, canvas: canvas }).promise;
 
         const imgDataUri = canvas.toDataURL('image/jpeg', selectedLevel.quality);
         const imgBytes = await fetch(imgDataUri).then(res => res.arrayBuffer());
@@ -70,7 +70,7 @@ export default function CompressPage() {
       }
 
       const pdfBytes = await outPdf.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
 
       setResult({ blob, size: blob.size });
     } catch (e) {

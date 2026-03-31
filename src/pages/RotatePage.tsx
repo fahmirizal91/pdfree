@@ -1,9 +1,9 @@
 // src/pages/RotatePage.tsx
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument, degrees } from 'pdf-lib';
 import * as pdfjs from 'pdfjs-dist';
-import { RefreshCw, Download, Loader2, RotateCw } from 'lucide-react';
+import { Download, Loader2, RotateCw } from 'lucide-react';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -37,7 +37,7 @@ export default function RotatePage() {
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvasContext: ctx, viewport, canvas: canvas }).promise;
         previews.push(canvas.toDataURL());
         initialRotations.push(0); // Rotasi awal 0 derajat
       }
@@ -78,7 +78,7 @@ export default function RotatePage() {
       });
 
       const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

@@ -9,6 +9,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/pdfree/',
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"), // Daftarkan @ ke folder src

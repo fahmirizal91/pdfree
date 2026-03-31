@@ -41,6 +41,7 @@ export default function PdfPagePreview({ file, pageIndex, scale = 0.5 }: PdfPage
         const renderContext = {
           canvasContext: context,
           viewport: viewport,
+		  canvas: canvas,
         };
 
         // 4. Eksekusi render dan TUNGGU sampai selesai

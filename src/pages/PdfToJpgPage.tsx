@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjs from 'pdfjs-dist';
 import JSZip from 'jszip';
-import { Image as ImageIcon, Download, Loader2, FileImage } from 'lucide-react';
+// import { Image as ImageIcon, Download, Loader2, FileImage } from 'lucide-react';
 
 export default function PdfToJpgPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -12,7 +12,7 @@ export default function PdfToJpgPage() {
 
   const onDrop = (acceptedFiles: File[]) => setFile(acceptedFiles[0]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps } = useDropzone({
     accept: { 'application/pdf': ['.pdf'] }, multiple: false, onDrop
   });
 
@@ -35,7 +35,7 @@ export default function PdfToJpgPage() {
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvasContext: ctx, viewport, canvas: canvas }).promise;
         
         // Ubah canvas ke base64 image
         const imgData = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
