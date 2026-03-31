@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as pdfjs from 'pdfjs-dist';
 import JSZip from 'jszip';
-// import { Image as ImageIcon, Download, Loader2, FileImage } from 'lucide-react';
+import { Image as ImageIcon, Loader2, FileImage } from 'lucide-react';
 
 export default function PdfToJpgPage() {
   const [file, setFile] = useState<File | null>(null);
