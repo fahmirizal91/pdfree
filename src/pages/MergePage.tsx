@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
-import { Merge, Download, Loader2, GripVertical, X } from 'lucide-react';
+import { Merge, Loader2, GripVertical, X } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 
 // Interface baru untuk membungkus File dengan ID unik
