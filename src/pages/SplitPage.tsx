@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
-import JSZip from 'jszip'; // Tambahkan import jszip
-import { Scissors, Download, Loader2, Trash2, Undo2, GripVertical, FileWarning } from 'lucide-react';
+import JSZip from 'jszip';
+import { Scissors, Download, Loader2, Trash2, Undo2, GripVertical, FileWarning, Zip } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import PdfPagePreview from '@/components/PdfPagePreview';
 
@@ -71,7 +71,7 @@ export default function SplitPage() {
   const handleProcess = async () => {
     if (!file || processing) return;
 
-    if (mode === 'selected' && includedPageCount === 0) {
+    if (includedPageCount === 0) {
       alert("Silakan pilih minimal satu halaman untuk diproses.");
       return;
     }
@@ -82,42 +82,43 @@ export default function SplitPage() {
       const arrayBuffer = await file.arrayBuffer();
       const sourcePdf = await PDFDocument.load(arrayBuffer);
       
+      // Ambil hanya halaman yang TIDAK dihapus (aktif) dan sesuai urutan barunya
+      const activePages = pages.filter(p => !p.isExcluded);
+
       if (mode === 'all') {
-        // PERBAIKAN: Gunakan JSZip untuk mode Split All
         const zip = new JSZip();
         
-        for (let i = 0; i < sourcePdf.getPageCount(); i++) {
+        // Looping hanya pada halaman yang aktif
+        for (let i = 0; i < activePages.length; i++) {
+          const pageItem = activePages[i];
           const newPdf = await PDFDocument.create();
-          const [copiedPage] = await newPdf.copyPages(sourcePdf, [i]);
+          
+          // Copy dari index asli halaman tersebut
+          const [copiedPage] = await newPdf.copyPages(sourcePdf, [pageItem.originalIndex]);
           newPdf.addPage(copiedPage);
           const pdfBytes = await newPdf.save();
           
-          // Masukkan file PDF tunggal ke dalam ZIP
+          // Namai file berdasarkan urutan baru (1, 2, 3...)
           zip.file(`page_${i + 1}_${file.name}`, pdfBytes);
         }
 
-        // Generate dan Download file ZIP
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(zipBlob);
-        link.download = `split_all_${file.name.replace('.pdf', '')}.zip`;
+        link.download = `split_${file.name.replace('.pdf', '')}.zip`;
         link.click();
         setTimeout(() => URL.revokeObjectURL(link.href), 100);
 
       } else {
-        // Mode 'selected' tetap menggabungkan halaman ke dalam 1 PDF baru
+        // Mode 'selected' (Gabung jadi 1 PDF)
         const newPdf = await PDFDocument.create();
-        const indicesToKeep = pages
-          .filter(p => !p.isExcluded)
-          .map(p => p.originalIndex);
+        const indicesToKeep = activePages.map(p => p.originalIndex);
 
-        if (indicesToKeep.length > 0) {
-          const copiedPages = await newPdf.copyPages(sourcePdf, indicesToKeep);
-          copiedPages.forEach(p => newPdf.addPage(p));
-          
-          const pdfBytes = await newPdf.save();
-          downloadFile(pdfBytes, `processed_${file.name}`);
-        }
+        const copiedPages = await newPdf.copyPages(sourcePdf, indicesToKeep);
+        copiedPages.forEach(p => newPdf.addPage(p));
+        
+        const pdfBytes = await newPdf.save();
+        downloadFile(pdfBytes, `processed_${file.name}`);
       }
     } catch (error) {
       console.error(error);
@@ -162,7 +163,6 @@ export default function SplitPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8">
-          {/* Panel Kontrol */}
           <div className="lg:col-span-1 space-y-4">
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 h-fit sticky top-24">
               <h2 className="font-bold text-xl mb-4">Opsi Split</h2>
@@ -181,7 +181,7 @@ export default function SplitPage() {
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all ${mode === 'all' ? 'border-orange-500 bg-orange-50' : 'border-gray-100 hover:border-orange-200'}`}
                 >
                   <p className="font-bold">Pisahkan Semua</p>
-                  <p className="text-xs text-gray-500 mt-1">Semua halaman akan dipisah dan diunduh dalam bentuk file ZIP.</p>
+                  <p className="text-xs text-gray-500 mt-1">Halaman tersisa ({includedPageCount}) akan dipisah jadi file sendiri dan diunduh dalam ZIP.</p>
                 </button>
               </div>
 
@@ -207,12 +207,11 @@ export default function SplitPage() {
             {mode === 'all' && (
                <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl text-amber-800 flex gap-3 text-sm">
                  <FileWarning className="text-amber-500 flex-shrink-0" size={20}/>
-                 <p><b>Catatan:</b> Mode "Pisahkan Semua" akan mengabaikan kustomisasi urutan. File akan diunduh sebagai <b>.zip</b> agar tidak diblokir oleh browser.</p>
+                 <p><b>Catatan:</b> File akan diunduh sebagai <b>.zip</b> berisi {includedPageCount} halaman terpisah untuk menghindari pemblokiran unduhan oleh browser.</p>
                </div>
             )}
           </div>
 
-          {/* Panel Grid Halaman */}
           <div className="lg:col-span-1">
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="pdf-pages-grid" direction="horizontal">
