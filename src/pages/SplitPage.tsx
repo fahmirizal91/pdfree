@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { PDFDocument } from 'pdf-lib';
 import JSZip from 'jszip';
-import { Scissors, Download, Loader2, Trash2, Undo2, GripVertical, FileWarning, Zip } from 'lucide-react';
+import { Scissors, Download, Loader2, Trash2, Undo2, GripVertical, FileWarning } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import PdfPagePreview from '@/components/PdfPagePreview';
 
